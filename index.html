@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>English Memory Trainer</title>
+
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+
+    margin: 0;
+    padding: 20px;
+
+    font-family: Arial, sans-serif;
+
+    background: #111827;
+    color: white;
+
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+
+    width: 100%;
+    max-width: 500px;
+
+    background: #1f2937;
+
+    padding: 24px;
+
+    border-radius: 16px;
+}
+
+h1 {
+
+    text-align: center;
+
+    font-size: 24px;
+
+    margin-top: 0;
+}
+
+.status {
+
+    text-align: center;
+
+    margin-bottom: 16px;
+
+    padding: 10px;
+
+    border-radius: 8px;
+
+    background: #374151;
+
+    color: #facc15;
+}
+
+textarea {
+
+    width: 100%;
+
+    min-height: 140px;
+
+    resize: vertical;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    font-size: 18px;
+
+    font-family: Arial, sans-serif;
+
+    outline: none;
+}
+
+.buttons {
+
+    display: flex;
+
+    gap: 12px;
+
+    margin-top: 16px;
+}
+
+button {
+
+    flex: 1;
+
+    padding: 14px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+button:active {
+
+    transform: scale(0.97);
+}
+
+.add-button {
+
+    background: #22c55e;
+    color: white;
+}
+
+.reset-button {
+
+    background: #ef4444;
+    color: white;
+}
+
+.info {
+
+    margin-top: 18px;
+
+    color: #d1d5db;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>English Memory Trainer</h1>
+
+    <div class="status" id="status">
+        กำลังเชื่อมต่อ MQTT...
+    </div>
+
+    <textarea
+        id="message"
+        placeholder="พิมพ์ข้อความภาษาอังกฤษที่ต้องการส่งไปยัง OLED">
+    </textarea>
+
+    <div class="buttons">
+
+        <button
+            class="add-button"
+            onclick="addMessage()">
+            เพิ่มเข้า
+        </button>
+
+        <button
+            class="reset-button"
+            onclick="resetDisplay()">
+            รีเซ็ตใหม่
+        </button>
+
+    </div>
+
+    <div class="info">
+
+        ตัวอย่างข้อความ:
+
+        <br>
+
+        Let's take a look at Set Position.
+
+        <br>
+
+        Physically, setting the position means moving the object to another location.
+
+    </div>
+
+</div>
+
+
+<script>
+
+// ======================================================
+// MQTT SETTINGS
+// ======================================================
+
+const MQTT_BROKER =
+    "wss://broker.hivemq.com:8884/mqtt";
+
+const MQTT_TOPIC =
+    "bo/english-memory";
+
+let mqttClient;
+
+
+// ======================================================
+// STATUS
+// ======================================================
+
+function setStatus(text, color = "#facc15") {
+
+    const status =
+        document.getElementById("status");
+
+    status.textContent = text;
+    status.style.color = color;
+}
+
+
+// ======================================================
+// CONNECT MQTT
+// ======================================================
+
+function connectMQTT() {
+
+    setStatus("กำลังเชื่อมต่อ MQTT...");
+
+    mqttClient = mqtt.connect(
+        MQTT_BROKER
+    );
+
+    mqttClient.on("connect", function() {
+
+        setStatus(
+            "เชื่อมต่อแล้ว พร้อมใช้งาน",
+            "#4ade80"
+        );
+
+        console.log("MQTT connected");
+    });
+
+    mqttClient.on("reconnect", function() {
+
+        setStatus("กำลังเชื่อมต่อใหม่...");
+    });
+
+    mqttClient.on("error", function(error) {
+
+        console.log("MQTT Error:", error);
+
+        setStatus(
+            "เชื่อมต่อ MQTT ไม่สำเร็จ",
+            "#f87171"
+        );
+    });
+
+    mqttClient.on("offline", function() {
+
+        setStatus(
+            "MQTT Offline",
+            "#f87171"
+        );
+    });
+}
+
+
+// ======================================================
+// ADD MESSAGE
+// ======================================================
+
+function addMessage() {
+
+    const textarea =
+        document.getElementById("message");
+
+    const text =
+        textarea.value.trim();
+
+    if (text.length === 0) {
+
+        alert("กรุณาพิมพ์ข้อความก่อน");
+
+        return;
+    }
+
+    if (!mqttClient || !mqttClient.connected) {
+
+        alert("ยังไม่ได้เชื่อมต่อ MQTT");
+
+        return;
+    }
+
+    const payload =
+        "ADD|" + text;
+
+    mqttClient.publish(
+        MQTT_TOPIC,
+        payload
+    );
+
+    setStatus(
+        "ส่งข้อความไปยัง OLED แล้ว",
+        "#4ade80"
+    );
+
+    textarea.value = "";
+}
+
+
+// ======================================================
+// RESET DISPLAY
+// ======================================================
+
+function resetDisplay() {
+
+    if (!mqttClient || !mqttClient.connected) {
+
+        alert("ยังไม่ได้เชื่อมต่อ MQTT");
+
+        return;
+    }
+
+    mqttClient.publish(
+        MQTT_TOPIC,
+        "RESET"
+    );
+
+    setStatus(
+        "รีเซ็ตหน้าจอแล้ว",
+        "#facc15"
+    );
+}
+
+
+// ======================================================
+// START
+// ======================================================
+
+connectMQTT();
+
+</script>
+
+</body>
+
+</html>

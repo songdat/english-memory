@@ -1,421 +1,140 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<title>English Memory Trainer</title>
-
+<title>ESP8266 MQTT Test</title>
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
 
 <style>
 
 body {
-
-    font-family: Arial, sans-serif;
-
-    background: #111827;
-
-    color: white;
-
-    margin: 0;
-
-    padding: 20px;
-
-}
-
-
-.container {
-
-    max-width: 500px;
-
-    margin: auto;
-
+    font-family: Arial;
     text-align: center;
-
+    padding: 30px;
 }
-
-
-h1 {
-
-    margin-bottom: 25px;
-
-}
-
 
 input {
-
-    width: 100%;
-
-    box-sizing: border-box;
-
+    width: 80%;
+    max-width: 500px;
     padding: 15px;
-
     font-size: 18px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    margin-bottom: 15px;
-
 }
-
 
 button {
-
-    width: 100%;
-
-    padding: 15px;
-
+    padding: 15px 25px;
+    margin: 10px;
     font-size: 18px;
-
-    border: none;
-
-    border-radius: 10px;
-
-    margin-top: 10px;
-
     cursor: pointer;
-
 }
-
-
-.add {
-
-    background: #22c55e;
-
-    color: white;
-
-}
-
-
-.reset {
-
-    background: #ef4444;
-
-    color: white;
-
-}
-
 
 #status {
-
-    margin-top: 20px;
-
-    font-size: 15px;
-
+    margin: 20px;
+    font-weight: bold;
 }
-
 
 </style>
 
 </head>
 
-
 <body>
 
-
-<div class="container">
-
-
-<h1>
-English Memory Trainer
-</h1>
-
-
-<input
-    id="text"
-    type="text"
-    placeholder="Enter English sentence..."
->
-
-
-<button
-    class="add"
-    onclick="addText()">
-
-    เพิ่ม
-
-</button>
-
-
-<button
-    class="reset"
-    onclick="resetText()">
-
-    รีเซ็ต
-
-</button>
-
+<h2>ESP8266 MQTT TEST</h2>
 
 <div id="status">
-    Connecting MQTT...
+Connecting MQTT...
 </div>
 
+<input
+    id="message"
+    type="text"
+    placeholder="Type message here"
+>
 
-</div>
+<br>
 
+<button onclick="sendMessage()">
+SEND
+</button>
 
 <script>
 
+const MQTT_URL = "ws://broker.hivemq.com:8000/mqtt";
 
-// =====================================================
-// MQTT BROKER
-// =====================================================
-
-// HiveMQ Public Broker
-//
-// Browser ใช้ WebSocket
-//
-// ws://broker.hivemq.com:8000/mqtt
-
-const MQTT_URL =
-    "ws://broker.hivemq.com:8000/mqtt";
-
-
-// =====================================================
-// MQTT TOPICS
-// =====================================================
-
-const TEXT_TOPIC =
+const TOPIC =
     "english/trainer/esp8266_9A7C/text";
 
-const RESET_TOPIC =
-    "english/trainer/esp8266_9A7C/reset";
-
-
-// =====================================================
-// MQTT CLIENT
-// =====================================================
+const clientID =
+    "HTML_Test_" +
+    Math.random().toString(16).substr(2, 8);
 
 const client =
-    mqtt.connect(
-        MQTT_URL,
-        {
-
-            clientId:
-                "EnglishTrainerWeb_" +
-                Math.random()
-                .toString(16)
-                .substring(2),
-
-            clean: true,
-
-            connectTimeout:
-                10000,
-
-            reconnectPeriod:
-                3000
-
-        }
-    );
-
-
-// =====================================================
-// STATUS ELEMENT
-// =====================================================
+    mqtt.connect(MQTT_URL, {
+        clientId: clientID
+    });
 
 const status =
-    document.getElementById(
-        "status"
-    );
+    document.getElementById("status");
 
 
-// =====================================================
-// CONNECT
-// =====================================================
+client.on("connect", function() {
 
-client.on(
-    "connect",
-    function() {
+    console.log("MQTT CONNECTED");
 
-        console.log(
-            "MQTT CONNECTED"
-        );
+    status.innerHTML =
+        "🟢 MQTT CONNECTED";
+
+});
 
 
-        status.innerHTML =
-            "● MQTT Connected";
+client.on("error", function(error) {
 
-    }
-);
+    console.log("MQTT ERROR:", error);
 
+    status.innerHTML =
+        "🔴 MQTT ERROR";
 
-// =====================================================
-// RECONNECT
-// =====================================================
-
-client.on(
-    "reconnect",
-    function() {
-
-        status.innerHTML =
-            "● Reconnecting...";
-
-    }
-);
+});
 
 
-// =====================================================
-// OFFLINE
-// =====================================================
+client.on("offline", function() {
 
-client.on(
-    "offline",
-    function() {
+    status.innerHTML =
+        "🟠 MQTT OFFLINE";
 
-        status.innerHTML =
-            "● MQTT Offline";
-
-    }
-);
+});
 
 
-// =====================================================
-// ERROR
-// =====================================================
-
-client.on(
-    "error",
-    function(error) {
-
-        console.log(
-            "MQTT ERROR:",
-            error
-        );
-
-
-        status.innerHTML =
-            "● MQTT Error";
-
-    }
-);
-
-
-// =====================================================
-// ADD TEXT
-// =====================================================
-
-function addText() {
-
+function sendMessage() {
 
     const input =
-        document.getElementById(
-            "text"
-        );
+        document.getElementById("message");
 
-
-    const text =
+    const message =
         input.value.trim();
 
-
-    if (
-        text === ""
-    ) {
-
+    if (message === "") {
         return;
-
     }
-
-
-    if (
-        !client.connected
-    ) {
-
-        alert(
-            "MQTT is not connected."
-        );
-
-        return;
-
-    }
-
 
     client.publish(
-        TEXT_TOPIC,
-        text
+        TOPIC,
+        message
     );
-
 
     console.log(
-        "SEND:",
-        text
+        "Sent:",
+        message
     );
-
 
     input.value = "";
 
-
 }
-
-
-// =====================================================
-// RESET
-// =====================================================
-
-function resetText() {
-
-
-    if (
-        !client.connected
-    ) {
-
-        alert(
-            "MQTT is not connected."
-        );
-
-        return;
-
-    }
-
-
-    client.publish(
-        RESET_TOPIC,
-        "RESET"
-    );
-
-
-    console.log(
-        "RESET"
-    );
-
-
-}
-
-
-// =====================================================
-// ENTER KEY
-// =====================================================
-
-document
-.getElementById("text")
-.addEventListener(
-    "keydown",
-    function(event) {
-
-        if (
-            event.key === "Enter"
-        ) {
-
-            addText();
-
-        }
-
-    }
-);
-
 
 </script>
 
-
 </body>
-
 </html>

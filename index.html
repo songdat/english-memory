@@ -1,39 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ESP8266 MQTT Test</title>
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>English Memory Trainer</title>
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <style>
 
 body {
-    font-family: Arial;
+    font-family: Arial, sans-serif;
+    background: #111827;
+    color: white;
     text-align: center;
     padding: 30px;
 }
 
-input {
-    width: 80%;
-    max-width: 500px;
-    padding: 15px;
-    font-size: 18px;
+.container {
+    max-width: 600px;
+    margin: auto;
 }
 
-button {
-    padding: 15px 25px;
-    margin: 10px;
-    font-size: 18px;
-    cursor: pointer;
+h1 {
+    margin-bottom: 10px;
 }
 
 #status {
-    margin: 20px;
-    font-weight: bold;
+    padding: 12px;
+    margin: 20px 0;
+    border-radius: 8px;
+    background: #374151;
+}
+
+textarea {
+    width: 100%;
+    height: 140px;
+    box-sizing: border-box;
+    padding: 15px;
+    font-size: 18px;
+    border-radius: 8px;
+    border: none;
+    resize: vertical;
+}
+
+button {
+    padding: 14px 25px;
+    margin: 12px 5px;
+    font-size: 17px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#addBtn {
+    background: #22c55e;
+    color: white;
+}
+
+#resetBtn {
+    background: #ef4444;
+    color: white;
+}
+
+#log {
+    margin-top: 20px;
+    text-align: left;
+    background: #1f2937;
+    padding: 15px;
+    border-radius: 8px;
+    min-height: 80px;
+    white-space: pre-wrap;
 }
 
 </style>
@@ -42,50 +84,111 @@ button {
 
 <body>
 
-<h2>ESP8266 MQTT TEST</h2>
+<div class="container">
+
+<h1>English Memory Trainer</h1>
 
 <div id="status">
-Connecting MQTT...
+🟠 Connecting MQTT...
 </div>
 
-<input
+<textarea
     id="message"
-    type="text"
-    placeholder="Type message here"
->
+    placeholder="Type English sentences here..."
+></textarea>
 
 <br>
 
-<button onclick="sendMessage()">
-SEND
+<button id="addBtn" onclick="sendMessage()">
+ADD TEXT
 </button>
+
+<button id="resetBtn" onclick="resetText()">
+RESET
+</button>
+
+<div id="log">
+Waiting...
+</div>
+
+</div>
+
 
 <script>
 
-const MQTT_URL = "ws://broker.hivemq.com:8000/mqtt";
+/* =================================
+   MQTT SETTINGS
+================================= */
 
-const TOPIC =
+const MQTT_URL =
+    "wss://broker.hivemq.com:8884/mqtt";
+
+const TEXT_TOPIC =
     "english/trainer/esp8266_9A7C/text";
 
-const clientID =
-    "HTML_Test_" +
-    Math.random().toString(16).substr(2, 8);
+const RESET_TOPIC =
+    "english/trainer/esp8266_9A7C/reset";
 
-const client =
-    mqtt.connect(MQTT_URL, {
-        clientId: clientID
-    });
+
+/* =================================
+   MQTT CLIENT
+================================= */
+
+const clientID =
+    "EnglishHTML_" +
+    Math.random()
+        .toString(16)
+        .substring(2, 10);
+
+const client = mqtt.connect(MQTT_URL, {
+
+    clientId: clientID,
+
+    clean: true,
+
+    connectTimeout: 10000,
+
+    reconnectPeriod: 3000
+
+});
+
+
+/* =================================
+   STATUS
+================================= */
 
 const status =
     document.getElementById("status");
 
+const log =
+    document.getElementById("log");
+
 
 client.on("connect", function() {
 
-    console.log("MQTT CONNECTED");
-
     status.innerHTML =
         "🟢 MQTT CONNECTED";
+
+    log.innerHTML =
+        "Connected to MQTT broker.";
+
+    console.log("MQTT CONNECTED");
+
+});
+
+
+client.on("reconnect", function() {
+
+    status.innerHTML =
+        "🟠 MQTT RECONNECTING...";
+
+});
+
+
+client.on("offline", function() {
+
+    status.innerHTML =
+        "🔴 MQTT OFFLINE";
 
 });
 
@@ -97,44 +200,103 @@ client.on("error", function(error) {
     status.innerHTML =
         "🔴 MQTT ERROR";
 
-});
-
-
-client.on("offline", function() {
-
-    status.innerHTML =
-        "🟠 MQTT OFFLINE";
+    log.innerHTML =
+        "MQTT Error: " + error.message;
 
 });
 
+
+/* =================================
+   SEND TEXT
+================================= */
 
 function sendMessage() {
 
-    const input =
+    const textarea =
         document.getElementById("message");
 
     const message =
-        input.value.trim();
+        textarea.value.trim();
 
     if (message === "") {
+
+        alert("Please enter some text.");
+
         return;
     }
 
+
+    if (!client.connected) {
+
+        alert("MQTT is not connected yet.");
+
+        return;
+    }
+
+
     client.publish(
-        TOPIC,
+        TEXT_TOPIC,
         message
     );
 
-    console.log(
-        "Sent:",
-        message
-    );
 
-    input.value = "";
+    log.innerHTML =
+        "Sent to ESP8266:\n\n" +
+        message;
+
+
+    textarea.value = "";
 
 }
+
+
+/* =================================
+   RESET
+================================= */
+
+function resetText() {
+
+    if (!client.connected) {
+
+        alert("MQTT is not connected yet.");
+
+        return;
+    }
+
+
+    client.publish(
+        RESET_TOPIC,
+        "RESET"
+    );
+
+
+    log.innerHTML =
+        "RESET sent to ESP8266.";
+
+}
+
+
+/* =================================
+   ENTER KEY
+================================= */
+
+document
+    .getElementById("message")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter" &&
+            !event.shiftKey) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    });
 
 </script>
 
 </body>
+
 </html>

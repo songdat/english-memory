@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html>
 
 <head>
@@ -10,57 +11,109 @@
 
 <title>English Memory Trainer</title>
 
+
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
 
 <style>
 
 body {
+
     font-family: Arial, sans-serif;
+
     background: #111827;
+
     color: white;
+
     margin: 0;
+
     padding: 20px;
+
 }
+
 
 .container {
+
     max-width: 500px;
+
     margin: auto;
+
     text-align: center;
+
 }
+
 
 h1 {
-    margin-bottom: 30px;
+
+    margin-bottom: 25px;
+
 }
+
 
 input {
+
     width: 100%;
+
     box-sizing: border-box;
+
     padding: 15px;
+
     font-size: 18px;
+
     border: none;
+
     border-radius: 10px;
+
     margin-bottom: 15px;
+
 }
+
 
 button {
+
     width: 100%;
+
     padding: 15px;
+
     font-size: 18px;
+
     border: none;
+
     border-radius: 10px;
+
     margin-top: 10px;
+
     cursor: pointer;
+
 }
+
 
 .add {
+
     background: #22c55e;
+
     color: white;
+
 }
 
+
 .reset {
+
     background: #ef4444;
+
     color: white;
+
 }
+
+
+#status {
+
+    margin-top: 20px;
+
+    font-size: 15px;
+
+}
+
 
 </style>
 
@@ -72,7 +125,10 @@ button {
 
 <div class="container">
 
-<h1>English Memory Trainer</h1>
+
+<h1>
+English Memory Trainer
+</h1>
 
 
 <input
@@ -100,6 +156,11 @@ button {
 </button>
 
 
+<div id="status">
+    Connecting MQTT...
+</div>
+
+
 </div>
 
 
@@ -107,70 +168,69 @@ button {
 
 
 // =====================================================
-// HIVEMQ CLOUD
+// MQTT BROKER
 // =====================================================
 
-// ใส่ Cluster URL ของคุณ
-const MQTT_HOST =
-    "YOUR-CLUSTER.hivemq.cloud";
+// HiveMQ Public Broker
+//
+// Browser ใช้ WebSocket
+//
+// ws://broker.hivemq.com:8000/mqtt
 
-
-// HiveMQ Cloud WebSocket
-const MQTT_PORT = 8884;
-
-
-// MQTT Username
-const MQTT_USERNAME =
-    "YOUR_MQTT_USERNAME";
-
-
-// MQTT Password
-const MQTT_PASSWORD =
-    "YOUR_MQTT_PASSWORD";
+const MQTT_URL =
+    "ws://broker.hivemq.com:8000/mqtt";
 
 
 // =====================================================
-// TOPICS
+// MQTT TOPICS
 // =====================================================
 
 const TEXT_TOPIC =
-    "english/trainer/text";
+    "english/trainer/esp8266_9A7C/text";
 
 const RESET_TOPIC =
-    "english/trainer/reset";
+    "english/trainer/esp8266_9A7C/reset";
 
 
 // =====================================================
-// CONNECT
+// MQTT CLIENT
 // =====================================================
 
 const client =
     mqtt.connect(
-        "wss://" +
-        MQTT_HOST +
-        ":" +
-        MQTT_PORT +
-        "/mqtt",
+        MQTT_URL,
         {
-
-            username:
-                MQTT_USERNAME,
-
-            password:
-                MQTT_PASSWORD,
 
             clientId:
                 "EnglishTrainerWeb_" +
                 Math.random()
                 .toString(16)
-                .substring(2)
+                .substring(2),
+
+            clean: true,
+
+            connectTimeout:
+                10000,
+
+            reconnectPeriod:
+                3000
 
         }
     );
 
 
 // =====================================================
-// CONNECTED
+// STATUS ELEMENT
+// =====================================================
+
+const status =
+    document.getElementById(
+        "status"
+    );
+
+
+// =====================================================
+// CONNECT
 // =====================================================
 
 client.on(
@@ -180,6 +240,40 @@ client.on(
         console.log(
             "MQTT CONNECTED"
         );
+
+
+        status.innerHTML =
+            "● MQTT Connected";
+
+    }
+);
+
+
+// =====================================================
+// RECONNECT
+// =====================================================
+
+client.on(
+    "reconnect",
+    function() {
+
+        status.innerHTML =
+            "● Reconnecting...";
+
+    }
+);
+
+
+// =====================================================
+// OFFLINE
+// =====================================================
+
+client.on(
+    "offline",
+    function() {
+
+        status.innerHTML =
+            "● MQTT Offline";
 
     }
 );
@@ -194,9 +288,13 @@ client.on(
     function(error) {
 
         console.log(
-            "MQTT ERROR",
+            "MQTT ERROR:",
             error
         );
+
+
+        status.innerHTML =
+            "● MQTT Error";
 
     }
 );
@@ -208,11 +306,15 @@ client.on(
 
 function addText() {
 
-    let text =
-        document
-        .getElementById("text")
-        .value
-        .trim();
+
+    const input =
+        document.getElementById(
+            "text"
+        );
+
+
+    const text =
+        input.value.trim();
 
 
     if (
@@ -243,9 +345,14 @@ function addText() {
     );
 
 
-    document
-    .getElementById("text")
-    .value = "";
+    console.log(
+        "SEND:",
+        text
+    );
+
+
+    input.value = "";
+
 
 }
 
@@ -255,6 +362,7 @@ function addText() {
 // =====================================================
 
 function resetText() {
+
 
     if (
         !client.connected
@@ -275,9 +383,10 @@ function resetText() {
     );
 
 
-    document
-    .getElementById("text")
-    .value = "";
+    console.log(
+        "RESET"
+    );
+
 
 }
 

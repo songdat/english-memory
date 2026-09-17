@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="th">
+
+<html>
 
 <head>
 
@@ -10,345 +11,561 @@
 
 <title>English Memory Trainer</title>
 
-<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
-
 <style>
 
-* {
-    box-sizing: border-box;
-}
-
 body {
-
-    margin: 0;
-    padding: 20px;
-
     font-family: Arial, sans-serif;
-
     background: #111827;
     color: white;
-
-    min-height: 100vh;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin: 0;
+    padding: 20px;
 }
 
 .container {
-
-    width: 100%;
-    max-width: 500px;
-
-    background: #1f2937;
-
-    padding: 24px;
-
-    border-radius: 16px;
+    max-width: 600px;
+    margin: auto;
 }
 
 h1 {
-
     text-align: center;
-
-    font-size: 24px;
-
-    margin-top: 0;
 }
 
-.status {
-
-    text-align: center;
-
-    margin-bottom: 16px;
-
-    padding: 10px;
-
-    border-radius: 8px;
-
-    background: #374151;
-
-    color: #facc15;
+.card {
+    background: #1f2937;
+    padding: 20px;
+    border-radius: 15px;
+    margin-top: 20px;
 }
 
-textarea {
-
+input {
     width: 100%;
-
-    min-height: 140px;
-
-    resize: vertical;
-
+    box-sizing: border-box;
     padding: 14px;
-
-    border: none;
-
-    border-radius: 10px;
-
     font-size: 18px;
-
-    font-family: Arial, sans-serif;
-
-    outline: none;
-}
-
-.buttons {
-
-    display: flex;
-
-    gap: 12px;
-
-    margin-top: 16px;
+    border-radius: 8px;
+    border: none;
+    margin-bottom: 10px;
 }
 
 button {
-
-    flex: 1;
-
+    width: 100%;
     padding: 14px;
-
+    margin-top: 8px;
     border: none;
-
-    border-radius: 10px;
-
-    font-size: 18px;
-
-    font-weight: bold;
-
+    border-radius: 8px;
+    font-size: 17px;
     cursor: pointer;
 }
 
-button:active {
-
-    transform: scale(0.97);
-}
-
-.add-button {
-
+.add {
     background: #22c55e;
     color: white;
 }
 
-.reset-button {
-
+.reset {
     background: #ef4444;
     color: white;
 }
 
-.info {
+.connect {
+    background: #3b82f6;
+    color: white;
+}
 
-    margin-top: 18px;
+.status {
+    background: #374151;
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 15px;
+}
 
-    color: #d1d5db;
+.success {
+    color: #4ade80;
+}
 
+.error {
+    color: #f87171;
+}
+
+.message {
+    background: #111827;
+    padding: 12px;
+    border-radius: 8px;
+    margin-top: 8px;
+    word-wrap: break-word;
+}
+
+.ip {
     font-size: 14px;
-
-    line-height: 1.6;
+    color: #9ca3af;
+    margin-top: 8px;
 }
 
 </style>
 
 </head>
 
+
 <body>
 
 <div class="container">
 
-    <h1>English Memory Trainer</h1>
+<h1>English Memory Trainer</h1>
 
-    <div class="status" id="status">
-        กำลังเชื่อมต่อ MQTT...
-    </div>
 
-    <textarea
-        id="message"
-        placeholder="พิมพ์ข้อความภาษาอังกฤษที่ต้องการส่งไปยัง OLED">
-    </textarea>
+<!-- ========================================= -->
+<!-- CONNECTION -->
+<!-- ========================================= -->
 
-    <div class="buttons">
+<div class="card">
 
-        <button
-            class="add-button"
-            onclick="addMessage()">
-            เพิ่มเข้า
-        </button>
+<h2>ESP8266 Connection</h2>
 
-        <button
-            class="reset-button"
-            onclick="resetDisplay()">
-            รีเซ็ตใหม่
-        </button>
+<input
+    id="espIP"
+    type="text"
+    value="192.168.9.10"
+    placeholder="ESP8266 IP Address"
+>
 
-    </div>
+<button
+    class="connect"
+    onclick="checkConnection()">
 
-    <div class="info">
+    Connect to ESP8266
 
-        ตัวอย่างข้อความ:
+</button>
 
-        <br>
+<div class="status">
 
-        Let's take a look at Set Position.
+Status:
 
-        <br>
+<span id="connection">
+Not connected
+</span>
 
-        Physically, setting the position means moving the object to another location.
+</div>
 
-    </div>
+<div class="ip">
+
+Example: 192.168.9.10
+
+</div>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- SEND SENTENCE -->
+<!-- ========================================= -->
+
+<div class="card">
+
+<h2>Send English Sentence</h2>
+
+<input
+    id="sentence"
+    type="text"
+    placeholder="Enter English sentence..."
+>
+
+<button
+    class="add"
+    onclick="sendMessage()">
+
+    เพิ่มเข้า OLED
+
+</button>
+
+<button
+    class="reset"
+    onclick="resetMessage()">
+
+    รีเซ็ต
+
+</button>
+
+</div>
+
+
+<!-- ========================================= -->
+<!-- STATUS -->
+<!-- ========================================= -->
+
+<div class="card">
+
+<h2>ESP8266 Status</h2>
+
+<div class="status">
+
+<div>
+
+Connection:
+
+<span id="statusConnection">
+-
+
+</span>
+
+</div>
+
+
+<div class="message">
+
+Last message received:
+
+<br>
+
+<strong id="lastMessage">
+
+-
+
+</strong>
+
+</div>
+
+
+<div class="message">
+
+Received time:
+
+<br>
+
+<strong id="receivedTime">
+
+-
+
+</strong>
+
+</div>
+
+</div>
+
+</div>
 
 </div>
 
 
 <script>
 
-// ======================================================
-// MQTT SETTINGS
-// ======================================================
 
-const MQTT_BROKER =
-    "wss://broker.hivemq.com:8884/mqtt";
+// =====================================================
+// ESP8266 IP
+// =====================================================
 
-const MQTT_TOPIC =
-    "bo/english-memory";
+function getESPIP() {
 
-let mqttClient;
+    let ip =
+        document.getElementById("espIP").value.trim();
 
+    return ip;
 
-// ======================================================
-// STATUS
-// ======================================================
-
-function setStatus(text, color = "#facc15") {
-
-    const status =
-        document.getElementById("status");
-
-    status.textContent = text;
-    status.style.color = color;
 }
 
 
-// ======================================================
-// CONNECT MQTT
-// ======================================================
+// =====================================================
+// CHECK CONNECTION
+// =====================================================
 
-function connectMQTT() {
+function checkConnection() {
 
-    setStatus("กำลังเชื่อมต่อ MQTT...");
-
-    mqttClient = mqtt.connect(
-        MQTT_BROKER
-    );
-
-    mqttClient.on("connect", function() {
-
-        setStatus(
-            "เชื่อมต่อแล้ว พร้อมใช้งาน",
-            "#4ade80"
-        );
-
-        console.log("MQTT connected");
-    });
-
-    mqttClient.on("reconnect", function() {
-
-        setStatus("กำลังเชื่อมต่อใหม่...");
-    });
-
-    mqttClient.on("error", function(error) {
-
-        console.log("MQTT Error:", error);
-
-        setStatus(
-            "เชื่อมต่อ MQTT ไม่สำเร็จ",
-            "#f87171"
-        );
-    });
-
-    mqttClient.on("offline", function() {
-
-        setStatus(
-            "MQTT Offline",
-            "#f87171"
-        );
-    });
-}
+    let ip = getESPIP();
 
 
-// ======================================================
-// ADD MESSAGE
-// ======================================================
+    if (ip === "") {
 
-function addMessage() {
-
-    const textarea =
-        document.getElementById("message");
-
-    const text =
-        textarea.value.trim();
-
-    if (text.length === 0) {
-
-        alert("กรุณาพิมพ์ข้อความก่อน");
+        alert("Please enter ESP8266 IP address.");
 
         return;
+
     }
 
-    if (!mqttClient || !mqttClient.connected) {
 
-        alert("ยังไม่ได้เชื่อมต่อ MQTT");
+    document.getElementById(
+        "connection"
+    ).innerHTML = "Connecting...";
 
-        return;
-    }
 
-    const payload =
-        "ADD|" + text;
+    fetch(
+        "http://" + ip + "/status"
+    )
 
-    mqttClient.publish(
-        MQTT_TOPIC,
-        payload
-    );
+    .then(response => {
 
-    setStatus(
-        "ส่งข้อความไปยัง OLED แล้ว",
-        "#4ade80"
-    );
+        if (!response.ok) {
 
-    textarea.value = "";
+            throw new Error(
+                "ESP8266 response error"
+            );
+
+        }
+
+        return response.json();
+
+    })
+
+    .then(data => {
+
+        document.getElementById(
+            "connection"
+        ).innerHTML =
+            "<span class='success'>CONNECTED</span>";
+
+
+        updateStatus(data);
+
+    })
+
+    .catch(error => {
+
+        document.getElementById(
+            "connection"
+        ).innerHTML =
+            "<span class='error'>DISCONNECTED</span>";
+
+        console.log(error);
+
+    });
+
 }
 
 
-// ======================================================
-// RESET DISPLAY
-// ======================================================
+// =====================================================
+// UPDATE STATUS
+// =====================================================
 
-function resetDisplay() {
+function updateStatus(data) {
 
-    if (!mqttClient || !mqttClient.connected) {
+    document.getElementById(
+        "statusConnection"
+    ).innerHTML =
+        "<span class='success'>CONNECTED</span>";
 
-        alert("ยังไม่ได้เชื่อมต่อ MQTT");
 
-        return;
-    }
+    document.getElementById(
+        "lastMessage"
+    ).innerText =
+        data.message || "-";
 
-    mqttClient.publish(
-        MQTT_TOPIC,
-        "RESET"
-    );
 
-    setStatus(
-        "รีเซ็ตหน้าจอแล้ว",
-        "#facc15"
-    );
+    document.getElementById(
+        "receivedTime"
+    ).innerText =
+        data.time || "-";
+
 }
 
 
-// ======================================================
-// START
-// ======================================================
+// =====================================================
+// SEND MESSAGE
+// =====================================================
 
-connectMQTT();
+function sendMessage() {
+
+    let ip = getESPIP();
+
+    let text =
+        document.getElementById(
+            "sentence"
+        ).value.trim();
+
+
+    if (ip === "") {
+
+        alert(
+            "Please enter ESP8266 IP address."
+        );
+
+        return;
+
+    }
+
+
+    if (text === "") {
+
+        alert(
+            "Please enter an English sentence."
+        );
+
+        return;
+
+    }
+
+
+    document.getElementById(
+        "statusConnection"
+    ).innerText =
+        "Sending...";
+
+
+    fetch(
+        "http://" +
+        ip +
+        "/add?text=" +
+        encodeURIComponent(text)
+    )
+
+    .then(response => {
+
+        if (!response.ok) {
+
+            throw new Error(
+                "ESP8266 response error"
+            );
+
+        }
+
+        return response.json();
+
+    })
+
+    .then(data => {
+
+        if (data.success) {
+
+            document.getElementById(
+                "sentence"
+            ).value = "";
+
+
+            document.getElementById(
+                "statusConnection"
+            ).innerHTML =
+                "<span class='success'>MESSAGE SENT</span>";
+
+
+            checkConnection();
+
+        }
+
+        else {
+
+            document.getElementById(
+                "statusConnection"
+            ).innerHTML =
+                "<span class='error'>SEND FAILED</span>";
+
+        }
+
+    })
+
+    .catch(error => {
+
+        document.getElementById(
+            "statusConnection"
+        ).innerHTML =
+            "<span class='error'>ESP8266 NOT FOUND</span>";
+
+
+        console.log(error);
+
+        alert(
+            "Cannot connect to ESP8266."
+        );
+
+    });
+
+}
+
+
+// =====================================================
+// RESET
+// =====================================================
+
+function resetMessage() {
+
+    let ip = getESPIP();
+
+
+    if (ip === "") {
+
+        alert(
+            "Please enter ESP8266 IP address."
+        );
+
+        return;
+
+    }
+
+
+    fetch(
+        "http://" +
+        ip +
+        "/reset"
+    )
+
+    .then(response => response.json())
+
+    .then(data => {
+
+        if (data.success) {
+
+            document.getElementById(
+                "lastMessage"
+            ).innerText = "-";
+
+
+            document.getElementById(
+                "receivedTime"
+            ).innerText = "-";
+
+
+            document.getElementById(
+                "statusConnection"
+            ).innerHTML =
+                "<span class='success'>RESET OK</span>";
+
+        }
+
+    })
+
+    .catch(error => {
+
+        document.getElementById(
+            "statusConnection"
+        ).innerHTML =
+            "<span class='error'>RESET FAILED</span>";
+
+    });
+
+}
+
+
+// =====================================================
+// ENTER KEY
+// =====================================================
+
+document
+.getElementById("sentence")
+.addEventListener(
+    "keydown",
+    function(event) {
+
+        if (event.key === "Enter") {
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// AUTO CHECK
+// =====================================================
+
+setInterval(
+    function() {
+
+        checkConnection();
+
+    },
+    5000
+);
 
 </script>
+
 
 </body>
 

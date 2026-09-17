@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
@@ -22,38 +21,41 @@ body {
 }
 
 .container {
-    max-width: 600px;
+    max-width: 500px;
     margin: auto;
-}
-
-h1 {
     text-align: center;
 }
 
-.card {
-    background: #1f2937;
-    padding: 20px;
-    border-radius: 15px;
-    margin-top: 20px;
+h1 {
+    margin-bottom: 30px;
 }
 
 input {
     width: 100%;
     box-sizing: border-box;
-    padding: 14px;
+
+    padding: 15px;
+
     font-size: 18px;
-    border-radius: 8px;
+
     border: none;
-    margin-bottom: 10px;
+    border-radius: 10px;
+
+    margin-bottom: 15px;
 }
 
 button {
     width: 100%;
-    padding: 14px;
-    margin-top: 8px;
+
+    padding: 15px;
+
+    font-size: 18px;
+
     border: none;
-    border-radius: 8px;
-    font-size: 17px;
+    border-radius: 10px;
+
+    margin-top: 10px;
+
     cursor: pointer;
 }
 
@@ -67,38 +69,8 @@ button {
     color: white;
 }
 
-.connect {
-    background: #3b82f6;
-    color: white;
-}
-
-.status {
-    background: #374151;
-    padding: 15px;
-    border-radius: 10px;
-    margin-top: 15px;
-}
-
-.success {
-    color: #4ade80;
-}
-
-.error {
-    color: #f87171;
-}
-
-.message {
-    background: #111827;
-    padding: 12px;
-    border-radius: 8px;
-    margin-top: 8px;
-    word-wrap: break-word;
-}
-
-.ip {
-    font-size: 14px;
-    color: #9ca3af;
-    margin-top: 8px;
+button:active {
+    transform: scale(0.98);
 }
 
 </style>
@@ -108,140 +80,36 @@ button {
 
 <body>
 
+
 <div class="container">
 
 <h1>English Memory Trainer</h1>
 
 
-<!-- ========================================= -->
-<!-- CONNECTION -->
-<!-- ========================================= -->
-
-<div class="card">
-
-<h2>ESP8266 Connection</h2>
-
 <input
-    id="espIP"
-    type="text"
-    value="192.168.9.10"
-    placeholder="ESP8266 IP Address"
->
-
-<button
-    class="connect"
-    onclick="checkConnection()">
-
-    Connect to ESP8266
-
-</button>
-
-<div class="status">
-
-Status:
-
-<span id="connection">
-Not connected
-</span>
-
-</div>
-
-<div class="ip">
-
-Example: 192.168.9.10
-
-</div>
-
-</div>
-
-
-<!-- ========================================= -->
-<!-- SEND SENTENCE -->
-<!-- ========================================= -->
-
-<div class="card">
-
-<h2>Send English Sentence</h2>
-
-<input
-    id="sentence"
+    id="text"
     type="text"
     placeholder="Enter English sentence..."
 >
 
+
 <button
     class="add"
-    onclick="sendMessage()">
+    onclick="addText()">
 
-    เพิ่มเข้า OLED
+    เพิ่ม
 
 </button>
 
+
 <button
     class="reset"
-    onclick="resetMessage()">
+    onclick="resetText()">
 
     รีเซ็ต
 
 </button>
 
-</div>
-
-
-<!-- ========================================= -->
-<!-- STATUS -->
-<!-- ========================================= -->
-
-<div class="card">
-
-<h2>ESP8266 Status</h2>
-
-<div class="status">
-
-<div>
-
-Connection:
-
-<span id="statusConnection">
--
-
-</span>
-
-</div>
-
-
-<div class="message">
-
-Last message received:
-
-<br>
-
-<strong id="lastMessage">
-
--
-
-</strong>
-
-</div>
-
-
-<div class="message">
-
-Received time:
-
-<br>
-
-<strong id="receivedTime">
-
--
-
-</strong>
-
-</div>
-
-</div>
-
-</div>
 
 </div>
 
@@ -249,320 +117,127 @@ Received time:
 <script>
 
 
-// =====================================================
 // ESP8266 IP
-// =====================================================
-
-function getESPIP() {
-
-    let ip =
-        document.getElementById("espIP").value.trim();
-
-    return ip;
-
-}
+const ESP8266 =
+    "http://192.168.9.10";
 
 
-// =====================================================
-// CHECK CONNECTION
-// =====================================================
+// ==========================================
+// เพิ่มข้อความ
+// ==========================================
 
-function checkConnection() {
-
-    let ip = getESPIP();
-
-
-    if (ip === "") {
-
-        alert("Please enter ESP8266 IP address.");
-
-        return;
-
-    }
-
-
-    document.getElementById(
-        "connection"
-    ).innerHTML = "Connecting...";
-
-
-    fetch(
-        "http://" + ip + "/status"
-    )
-
-    .then(response => {
-
-        if (!response.ok) {
-
-            throw new Error(
-                "ESP8266 response error"
-            );
-
-        }
-
-        return response.json();
-
-    })
-
-    .then(data => {
-
-        document.getElementById(
-            "connection"
-        ).innerHTML =
-            "<span class='success'>CONNECTED</span>";
-
-
-        updateStatus(data);
-
-    })
-
-    .catch(error => {
-
-        document.getElementById(
-            "connection"
-        ).innerHTML =
-            "<span class='error'>DISCONNECTED</span>";
-
-        console.log(error);
-
-    });
-
-}
-
-
-// =====================================================
-// UPDATE STATUS
-// =====================================================
-
-function updateStatus(data) {
-
-    document.getElementById(
-        "statusConnection"
-    ).innerHTML =
-        "<span class='success'>CONNECTED</span>";
-
-
-    document.getElementById(
-        "lastMessage"
-    ).innerText =
-        data.message || "-";
-
-
-    document.getElementById(
-        "receivedTime"
-    ).innerText =
-        data.time || "-";
-
-}
-
-
-// =====================================================
-// SEND MESSAGE
-// =====================================================
-
-function sendMessage() {
-
-    let ip = getESPIP();
+function addText() {
 
     let text =
-        document.getElementById(
-            "sentence"
-        ).value.trim();
-
-
-    if (ip === "") {
-
-        alert(
-            "Please enter ESP8266 IP address."
-        );
-
-        return;
-
-    }
+        document
+        .getElementById("text")
+        .value
+        .trim();
 
 
     if (text === "") {
 
-        alert(
-            "Please enter an English sentence."
-        );
-
         return;
 
     }
 
 
-    document.getElementById(
-        "statusConnection"
-    ).innerText =
-        "Sending...";
-
-
     fetch(
-        "http://" +
-        ip +
+        ESP8266 +
         "/add?text=" +
         encodeURIComponent(text)
     )
 
-    .then(response => {
+    .then(
+        response =>
+        response.json()
+    )
 
-        if (!response.ok) {
+    .then(
+        data => {
 
-            throw new Error(
-                "ESP8266 response error"
-            );
+            if (data.success) {
 
-        }
+                document
+                .getElementById("text")
+                .value = "";
 
-        return response.json();
-
-    })
-
-    .then(data => {
-
-        if (data.success) {
-
-            document.getElementById(
-                "sentence"
-            ).value = "";
-
-
-            document.getElementById(
-                "statusConnection"
-            ).innerHTML =
-                "<span class='success'>MESSAGE SENT</span>";
-
-
-            checkConnection();
+            }
 
         }
+    )
 
-        else {
+    .catch(
+        error => {
 
-            document.getElementById(
-                "statusConnection"
-            ).innerHTML =
-                "<span class='error'>SEND FAILED</span>";
+            console.log(error);
 
         }
-
-    })
-
-    .catch(error => {
-
-        document.getElementById(
-            "statusConnection"
-        ).innerHTML =
-            "<span class='error'>ESP8266 NOT FOUND</span>";
-
-
-        console.log(error);
-
-        alert(
-            "Cannot connect to ESP8266."
-        );
-
-    });
+    );
 
 }
 
 
-// =====================================================
-// RESET
-// =====================================================
+// ==========================================
+// รีเซ็ต
+// ==========================================
 
-function resetMessage() {
-
-    let ip = getESPIP();
-
-
-    if (ip === "") {
-
-        alert(
-            "Please enter ESP8266 IP address."
-        );
-
-        return;
-
-    }
-
+function resetText() {
 
     fetch(
-        "http://" +
-        ip +
+        ESP8266 +
         "/reset"
     )
 
-    .then(response => response.json())
+    .then(
+        response =>
+        response.json()
+    )
 
-    .then(data => {
+    .then(
+        data => {
 
-        if (data.success) {
+            if (data.success) {
 
-            document.getElementById(
-                "lastMessage"
-            ).innerText = "-";
+                document
+                .getElementById("text")
+                .value = "";
 
-
-            document.getElementById(
-                "receivedTime"
-            ).innerText = "-";
-
-
-            document.getElementById(
-                "statusConnection"
-            ).innerHTML =
-                "<span class='success'>RESET OK</span>";
+            }
 
         }
+    )
 
-    })
+    .catch(
+        error => {
 
-    .catch(error => {
+            console.log(error);
 
-        document.getElementById(
-            "statusConnection"
-        ).innerHTML =
-            "<span class='error'>RESET FAILED</span>";
-
-    });
+        }
+    );
 
 }
 
 
-// =====================================================
-// ENTER KEY
-// =====================================================
+// ==========================================
+// กด Enter เพื่อเพิ่ม
+// ==========================================
 
 document
-.getElementById("sentence")
+.getElementById("text")
 .addEventListener(
     "keydown",
     function(event) {
 
         if (event.key === "Enter") {
 
-            sendMessage();
+            addText();
 
         }
 
     }
 );
 
-
-// =====================================================
-// AUTO CHECK
-// =====================================================
-
-setInterval(
-    function() {
-
-        checkConnection();
-
-    },
-    5000
-);
 
 </script>
 

@@ -14,146 +14,248 @@
 
 <style>
 
+/* =================================
+   BODY
+================================= */
+
 body {
+
     font-family: Arial, sans-serif;
+
     background: #111827;
+
     color: white;
+
     text-align: center;
-    padding: 30px;
+
+    padding: 20px;
+
 }
 
-.container {
-    max-width: 600px;
-    margin: auto;
-}
-
-h1 {
-    margin-bottom: 10px;
-}
-
-#status {
-    padding: 12px;
-    margin: 20px 0;
-    border-radius: 8px;
-    background: #374151;
-}
 
 /* =================================
-   TEXTAREA
+   CONTAINER
+================================= */
+
+.container {
+
+    max-width: 700px;
+
+    margin: auto;
+
+}
+
+
+/* =================================
+   TITLE
+================================= */
+
+h1 {
+
+    margin-bottom: 10px;
+
+}
+
+
+/* =================================
+   STATUS
+================================= */
+
+#status {
+
+    padding: 12px;
+
+    margin: 20px 0;
+
+    border-radius: 8px;
+
+    background: #374151;
+
+}
+
+
+/* =================================
+   TEXT AREA
 ================================= */
 
 textarea {
+
     width: 100%;
-    height: 140px;
-    box-sizing: border-box;
-    padding: 15px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: none;
-    resize: vertical;
-    font-family: Arial, sans-serif;
-}
 
-/* =================================
-   OLED PREVIEW
-================================= */
+    height: 360px;
 
-.preview-title {
-    margin-top: 25px;
-    margin-bottom: 8px;
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.preview-info {
-    font-size: 14px;
-    color: #9ca3af;
-    margin-bottom: 10px;
-}
-
-#oledPreview {
-    width: 100%;
-    max-width: 420px;
-    margin: auto;
-    padding: 15px;
     box-sizing: border-box;
 
-    background: #000000;
-    border: 3px solid #4b5563;
-    border-radius: 10px;
-
-    text-align: left;
+    padding: 12px;
 
     font-family: monospace;
-    font-size: 16px;
-    line-height: 1.4;
+
+    font-size: 18px;
+
+    line-height: 1.6;
+
+    border-radius: 8px;
+
+    border: 2px solid #4b5563;
+
+    background: #000000;
 
     color: #ffffff;
 
-    white-space: pre;
-    overflow-x: auto;
+    resize: vertical;
+
+    outline: none;
+
 }
+
+
+/* =================================
+   TEXT AREA FOCUS
+================================= */
+
+textarea:focus {
+
+    border-color: #22c55e;
+
+}
+
+
+/* =================================
+   CHARACTER GUIDE
+================================= */
+
+.guide {
+
+    margin-top: 8px;
+
+    font-size: 14px;
+
+    color: #9ca3af;
+
+}
+
 
 /* =================================
    COUNTER
 ================================= */
 
 #counter {
+
     margin-top: 8px;
+
     font-size: 14px;
+
     color: #9ca3af;
+
 }
+
 
 /* =================================
    BUTTON
 ================================= */
 
 button {
+
     padding: 14px 25px;
+
     margin: 12px 5px;
+
     font-size: 17px;
+
     border: none;
+
     border-radius: 8px;
+
     cursor: pointer;
+
 }
+
 
 #addBtn {
+
     background: #22c55e;
+
     color: white;
+
 }
+
 
 #resetBtn {
+
     background: #ef4444;
+
     color: white;
+
 }
 
+
 button:hover {
+
     opacity: 0.85;
+
 }
+
 
 /* =================================
    LOG
 ================================= */
 
 #log {
+
     margin-top: 20px;
+
     text-align: left;
+
     background: #1f2937;
+
     padding: 15px;
+
     border-radius: 8px;
+
     min-height: 80px;
+
     white-space: pre-wrap;
+
+}
+
+
+/* =================================
+   MOBILE
+================================= */
+
+@media (max-width: 600px) {
+
+    body {
+
+        padding: 12px;
+
+    }
+
+    textarea {
+
+        height: 400px;
+
+        font-size: 17px;
+
+    }
+
 }
 
 </style>
 
 </head>
 
+
 <body>
+
 
 <div class="container">
 
-<h1>English Memory Trainer</h1>
+
+<h1>
+English Memory Trainer
+</h1>
+
 
 <div id="status">
 🟠 Connecting MQTT...
@@ -161,52 +263,56 @@ button:hover {
 
 
 <!-- =================================
-     TEXT INPUT
+     SINGLE TEXT BOX
 ================================= -->
 
 <textarea
     id="message"
-    placeholder="Type English sentences here...
+    placeholder="Type English here...
 
-Press ENTER for a new line.
-Press CTRL + ENTER to send."
+Use ENTER to start a new line.
+
+Try to keep each line around
+21 characters for the OLED."
 ></textarea>
 
 
-<!-- =================================
-     OLED PREVIEW
-================================= -->
+<div class="guide">
 
-<div class="preview-title">
-    OLED PREVIEW
+OLED line width: approximately 21 characters
+
 </div>
 
-<div class="preview-info">
-    21 characters × 4 lines
-</div>
-
-<div id="oledPreview">
-                     
-                     
-                     
-                     
-</div>
 
 <div id="counter">
-    Characters: 0 | Lines: 0
+
+Characters: 0 | Lines: 0
+
 </div>
+
+
+<br>
 
 
 <!-- =================================
      BUTTONS
 ================================= -->
 
-<button id="addBtn" onclick="sendMessage()">
+<button
+    id="addBtn"
+    onclick="sendMessage()">
+
 ADD TEXT
+
 </button>
 
-<button id="resetBtn" onclick="resetText()">
+
+<button
+    id="resetBtn"
+    onclick="resetText()">
+
 RESET
+
 </button>
 
 
@@ -215,13 +321,17 @@ RESET
 ================================= -->
 
 <div id="log">
+
 Waiting...
+
 </div>
+
 
 </div>
 
 
 <script>
+
 
 /* =================================
    MQTT SETTINGS
@@ -230,8 +340,10 @@ Waiting...
 const MQTT_URL =
     "wss://broker.hivemq.com:8884/mqtt";
 
+
 const TEXT_TOPIC =
     "english/trainer/esp8266_9A7C/text";
+
 
 const RESET_TOPIC =
     "english/trainer/esp8266_9A7C/reset";
@@ -242,22 +354,35 @@ const RESET_TOPIC =
 ================================= */
 
 const clientID =
+
     "EnglishHTML_" +
+
     Math.random()
+
         .toString(16)
+
         .substring(2, 10);
 
-const client = mqtt.connect(MQTT_URL, {
 
-    clientId: clientID,
+const client =
 
-    clean: true,
+    mqtt.connect(
 
-    connectTimeout: 10000,
+        MQTT_URL,
 
-    reconnectPeriod: 3000
+        {
 
-});
+            clientId: clientID,
+
+            clean: true,
+
+            connectTimeout: 10000,
+
+            reconnectPeriod: 3000
+
+        }
+
+    );
 
 
 /* =================================
@@ -265,195 +390,189 @@ const client = mqtt.connect(MQTT_URL, {
 ================================= */
 
 const status =
-    document.getElementById("status");
+
+    document.getElementById(
+        "status"
+    );
+
 
 const log =
-    document.getElementById("log");
+
+    document.getElementById(
+        "log"
+    );
+
 
 const textarea =
-    document.getElementById("message");
 
-const oledPreview =
-    document.getElementById("oledPreview");
+    document.getElementById(
+        "message"
+    );
+
 
 const counter =
-    document.getElementById("counter");
+
+    document.getElementById(
+        "counter"
+    );
 
 
 /* =================================
-   OLED SETTINGS
+   UPDATE COUNTER
 ================================= */
 
-const OLED_CHARS = 21;
-const OLED_LINES = 4;
+function updateCounter() {
 
-
-/* =================================
-   OLED PREVIEW
-================================= */
-
-function updateOLEDPreview() {
 
     const text =
+
         textarea.value;
 
-    let lines = [];
 
-    /*
-       Process each manually entered line
-    */
+    const lines =
 
-    const inputLines =
-        text.split("\n");
+        text === ""
 
+            ? 0
 
-    inputLines.forEach(function(line) {
+            : text.split("\n").length;
 
-        /*
-           Wrap every 21 characters
-        */
-
-        if (line.length === 0) {
-
-            lines.push("");
-
-            return;
-        }
-
-
-        for (
-            let i = 0;
-            i < line.length;
-            i += OLED_CHARS
-        ) {
-
-            lines.push(
-                line.substring(
-                    i,
-                    i + OLED_CHARS
-                )
-            );
-
-        }
-
-    });
-
-
-    /*
-       Show only the first 4 lines
-       as an OLED preview
-    */
-
-    let preview = "";
-
-    for (
-        let i = 0;
-        i < OLED_LINES;
-        i++
-    ) {
-
-        if (lines[i]) {
-
-            preview +=
-                lines[i].padEnd(
-                    OLED_CHARS,
-                    " "
-                );
-
-        } else {
-
-            preview +=
-                " ".repeat(
-                    OLED_CHARS
-                );
-
-        }
-
-
-        if (i < OLED_LINES - 1) {
-
-            preview += "\n";
-
-        }
-
-    }
-
-
-    oledPreview.textContent =
-        preview;
-
-
-    /*
-       Counter
-    */
 
     counter.textContent =
+
         "Characters: " +
+
         text.length +
+
         " | Lines: " +
-        lines.length;
+
+        lines;
+
 
 }
 
 
 /* =================================
-   UPDATE PREVIEW WHILE TYPING
+   UPDATE WHILE TYPING
 ================================= */
 
 textarea.addEventListener(
+
     "input",
-    updateOLEDPreview
+
+    updateCounter
+
 );
 
 
 /* =================================
-   MQTT STATUS
+   MQTT CONNECT
 ================================= */
 
-client.on("connect", function() {
+client.on(
 
-    status.innerHTML =
-        "🟢 MQTT CONNECTED";
+    "connect",
 
-    log.innerHTML =
-        "Connected to MQTT broker.";
-
-    console.log("MQTT CONNECTED");
-
-});
+    function() {
 
 
-client.on("reconnect", function() {
+        status.innerHTML =
 
-    status.innerHTML =
-        "🟠 MQTT RECONNECTING...";
-
-});
+            "🟢 MQTT CONNECTED";
 
 
-client.on("offline", function() {
+        log.innerHTML =
 
-    status.innerHTML =
-        "🔴 MQTT OFFLINE";
-
-});
+            "Connected to MQTT broker.";
 
 
-client.on("error", function(error) {
+        console.log(
+            "MQTT CONNECTED"
+        );
 
-    console.log(
-        "MQTT ERROR:",
-        error
-    );
 
-    status.innerHTML =
-        "🔴 MQTT ERROR";
+    }
 
-    log.innerHTML =
-        "MQTT Error: " +
-        error.message;
+);
 
-});
+
+/* =================================
+   MQTT RECONNECT
+================================= */
+
+client.on(
+
+    "reconnect",
+
+    function() {
+
+
+        status.innerHTML =
+
+            "🟠 MQTT RECONNECTING...";
+
+
+    }
+
+);
+
+
+/* =================================
+   MQTT OFFLINE
+================================= */
+
+client.on(
+
+    "offline",
+
+    function() {
+
+
+        status.innerHTML =
+
+            "🔴 MQTT OFFLINE";
+
+
+    }
+
+);
+
+
+/* =================================
+   MQTT ERROR
+================================= */
+
+client.on(
+
+    "error",
+
+    function(error) {
+
+
+        console.log(
+
+            "MQTT ERROR:",
+
+            error
+
+        );
+
+
+        status.innerHTML =
+
+            "🔴 MQTT ERROR";
+
+
+        log.innerHTML =
+
+            "MQTT Error: " +
+
+            error.message;
+
+
+    }
+
+);
 
 
 /* =================================
@@ -462,44 +581,63 @@ client.on("error", function(error) {
 
 function sendMessage() {
 
+
     const message =
+
         textarea.value.trim();
 
 
     if (message === "") {
 
+
         alert(
+
             "Please enter some text."
+
         );
 
+
         return;
+
     }
 
 
     if (!client.connected) {
 
+
         alert(
+
             "MQTT is not connected yet."
+
         );
 
+
         return;
+
     }
 
 
     client.publish(
+
         TEXT_TOPIC,
+
         message
+
     );
 
 
     log.innerHTML =
+
         "Sent to ESP8266:\n\n" +
+
         message;
 
 
     textarea.value = "";
 
-    updateOLEDPreview();
+
+    updateCounter();
+
 
 }
 
@@ -510,66 +648,92 @@ function sendMessage() {
 
 function resetText() {
 
+
     if (!client.connected) {
 
+
         alert(
+
             "MQTT is not connected yet."
+
         );
 
+
         return;
+
     }
 
 
     client.publish(
+
         RESET_TOPIC,
+
         "RESET"
+
     );
 
 
     log.innerHTML =
+
         "RESET sent to ESP8266.";
+
 
 }
 
 
 /* =================================
-   KEYBOARD CONTROL
+   KEYBOARD
 ================================= */
 
 /*
-   ENTER
-   = New line
 
-   CTRL + ENTER
-   = Send message
+ENTER
+= New line
+
+CTRL + ENTER
+= Send message
+
 */
 
 textarea.addEventListener(
+
     "keydown",
+
     function(event) {
 
+
         if (
+
             event.key === "Enter" &&
+
             event.ctrlKey
+
         ) {
+
 
             event.preventDefault();
 
+
             sendMessage();
+
 
         }
 
+
     }
+
 );
 
 
 /* =================================
-   INITIAL PREVIEW
+   INITIAL COUNTER
 ================================= */
 
-updateOLEDPreview();
+updateCounter();
+
 
 </script>
+
 
 </body>
 

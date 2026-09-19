@@ -39,7 +39,7 @@ body {
 
 .container {
 
-    max-width: 700px;
+    max-width: 500px;
 
     margin: auto;
 
@@ -75,24 +75,30 @@ h1 {
 
 
 /* =================================
-   TEXT AREA
+   OLED STYLE TEXT BOX
 ================================= */
 
 textarea {
 
-    width: 100%;
+    display: block;
+
+    width: 21ch;
 
     height: 360px;
 
     box-sizing: border-box;
 
-    padding: 12px;
+    margin: 0 auto;
+
+    padding: 10px;
 
     font-family: monospace;
 
     font-size: 18px;
 
     line-height: 1.6;
+
+    letter-spacing: 0;
 
     border-radius: 8px;
 
@@ -106,11 +112,15 @@ textarea {
 
     outline: none;
 
+    overflow-wrap: break-word;
+
+    word-break: break-all;
+
 }
 
 
 /* =================================
-   TEXT AREA FOCUS
+   FOCUS
 ================================= */
 
 textarea:focus {
@@ -121,12 +131,12 @@ textarea:focus {
 
 
 /* =================================
-   CHARACTER GUIDE
+   INFORMATION
 ================================= */
 
 .guide {
 
-    margin-top: 8px;
+    margin-top: 10px;
 
     font-size: 14px;
 
@@ -225,17 +235,11 @@ button:hover {
 
 @media (max-width: 600px) {
 
-    body {
-
-        padding: 12px;
-
-    }
-
     textarea {
 
-        height: 400px;
-
         font-size: 17px;
+
+        width: 21ch;
 
     }
 
@@ -263,23 +267,19 @@ English Memory Trainer
 
 
 <!-- =================================
-     SINGLE TEXT BOX
+     21 CHARACTER TEXT BOX
 ================================= -->
 
 <textarea
     id="message"
-    placeholder="Type English here...
-
-Use ENTER to start a new line.
-
-Try to keep each line around
-21 characters for the OLED."
+    wrap="soft"
+    placeholder="Type English here..."
 ></textarea>
 
 
 <div class="guide">
 
-OLED line width: approximately 21 characters
+21 characters per line
 
 </div>
 
@@ -418,24 +418,22 @@ const counter =
 
 
 /* =================================
-   UPDATE COUNTER
+   COUNTER
 ================================= */
 
 function updateCounter() {
 
 
     const text =
-
         textarea.value;
 
 
     const lines =
-
         text === ""
-
             ? 0
-
-            : text.split("\n").length;
+            : Math.ceil(
+                text.length / 21
+              );
 
 
     counter.textContent =
@@ -453,7 +451,7 @@ function updateCounter() {
 
 
 /* =================================
-   UPDATE WHILE TYPING
+   UPDATE COUNTER
 ================================= */
 
 textarea.addEventListener(
@@ -477,12 +475,10 @@ client.on(
 
 
         status.innerHTML =
-
             "🟢 MQTT CONNECTED";
 
 
         log.innerHTML =
-
             "Connected to MQTT broker.";
 
 
@@ -508,7 +504,6 @@ client.on(
 
 
         status.innerHTML =
-
             "🟠 MQTT RECONNECTING...";
 
 
@@ -529,7 +524,6 @@ client.on(
 
 
         status.innerHTML =
-
             "🔴 MQTT OFFLINE";
 
 
@@ -550,23 +544,17 @@ client.on(
 
 
         console.log(
-
             "MQTT ERROR:",
-
             error
-
         );
 
 
         status.innerHTML =
-
             "🔴 MQTT ERROR";
 
 
         log.innerHTML =
-
             "MQTT Error: " +
-
             error.message;
 
 
@@ -583,7 +571,6 @@ function sendMessage() {
 
 
     const message =
-
         textarea.value.trim();
 
 
@@ -591,9 +578,7 @@ function sendMessage() {
 
 
         alert(
-
             "Please enter some text."
-
         );
 
 
@@ -606,9 +591,7 @@ function sendMessage() {
 
 
         alert(
-
             "MQTT is not connected yet."
-
         );
 
 
@@ -653,9 +636,7 @@ function resetText() {
 
 
         alert(
-
             "MQTT is not connected yet."
-
         );
 
 
@@ -682,18 +663,9 @@ function resetText() {
 
 
 /* =================================
-   KEYBOARD
+   CTRL + ENTER
+   SEND MESSAGE
 ================================= */
-
-/*
-
-ENTER
-= New line
-
-CTRL + ENTER
-= Send message
-
-*/
 
 textarea.addEventListener(
 
@@ -726,7 +698,7 @@ textarea.addEventListener(
 
 
 /* =================================
-   INITIAL COUNTER
+   INITIAL
 ================================= */
 
 updateCounter();

@@ -8,15 +8,11 @@
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>English Memory Trainer</title>
+<title>English Memory Trainer V4</title>
 
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <style>
-
-/* =================================
-   BODY
-================================= */
 
 body {
 
@@ -28,38 +24,23 @@ body {
 
     text-align: center;
 
-    padding: 20px;
+    padding: 30px;
 
 }
 
-
-/* =================================
-   CONTAINER
-================================= */
-
 .container {
 
-    max-width: 500px;
+    max-width: 600px;
 
     margin: auto;
 
 }
-
-
-/* =================================
-   TITLE
-================================= */
 
 h1 {
 
     margin-bottom: 10px;
 
 }
-
-
-/* =================================
-   STATUS
-================================= */
 
 #status {
 
@@ -73,14 +54,11 @@ h1 {
 
 }
 
-
-/* =================================
-   TEXT AREA
-================================= */
+/* ============================= */
+/* TEXT AREA */
+/* ============================= */
 
 textarea {
-
-    display: block;
 
     width: 21ch;
 
@@ -88,9 +66,7 @@ textarea {
 
     box-sizing: border-box;
 
-    margin: 0 auto;
-
-    padding: 10px;
+    padding: 12px;
 
     font-family: monospace;
 
@@ -98,73 +74,43 @@ textarea {
 
     line-height: 1.6;
 
-    letter-spacing: 0;
-
     border-radius: 8px;
 
-    border: 2px solid #4b5563;
-
-    background: #000000;
-
-    color: #ffffff;
+    border: none;
 
     resize: vertical;
 
-    outline: none;
+    white-space: pre-wrap;
 
     overflow-wrap: break-word;
 
-    word-wrap: break-word;
+    word-break: break-all;
 
-    white-space: pre-wrap;
+    display: block;
 
-}
-
-
-/* =================================
-   FOCUS
-================================= */
-
-textarea:focus {
-
-    border-color: #22c55e;
+    margin: 0 auto;
 
 }
 
-
-/* =================================
-   GUIDE
-================================= */
-
-.guide {
-
-    margin-top: 10px;
-
-    font-size: 14px;
-
-    color: #9ca3af;
-
-}
-
-
-/* =================================
-   COUNTER
-================================= */
+/* ============================= */
+/* COUNTER */
+/* ============================= */
 
 #counter {
 
     margin-top: 8px;
 
+    font-family: monospace;
+
     font-size: 14px;
 
     color: #9ca3af;
 
 }
 
-
-/* =================================
-   BUTTONS
-================================= */
+/* ============================= */
+/* BUTTON */
+/* ============================= */
 
 button {
 
@@ -182,7 +128,6 @@ button {
 
 }
 
-
 #addBtn {
 
     background: #22c55e;
@@ -190,7 +135,6 @@ button {
     color: white;
 
 }
-
 
 #resetBtn {
 
@@ -200,17 +144,9 @@ button {
 
 }
 
-
-button:hover {
-
-    opacity: 0.85;
-
-}
-
-
-/* =================================
-   LOG
-================================= */
+/* ============================= */
+/* LOG */
+/* ============================= */
 
 #log {
 
@@ -228,24 +164,17 @@ button:hover {
 
     white-space: pre-wrap;
 
+    font-family: monospace;
+
 }
 
+.help {
 
-/* =================================
-   MOBILE
-================================= */
+    margin-top: 15px;
 
-@media (max-width: 600px) {
+    color: #9ca3af;
 
-    textarea {
-
-        width: 21ch;
-
-        height: 420px;
-
-        font-size: 17px;
-
-    }
+    font-size: 14px;
 
 }
 
@@ -260,45 +189,25 @@ button:hover {
 <div class="container">
 
 
-<h1>
-English Memory Trainer
-</h1>
+<h1>English Memory Trainer V4</h1>
 
 
 <div id="status">
+
 🟠 Connecting MQTT...
+
 </div>
 
-
-<!-- =================================
-     SINGLE TEXT BOX
-================================= -->
 
 <textarea
     id="message"
-    wrap="soft"
-    placeholder="Type English here..."
-></textarea>
-
-
-<div class="guide">
-
-21 characters per OLED line
-
-<br>
-
-Press ENTER to start a new line.
-
-<br>
-
-Press CTRL + ENTER to send.
-
-</div>
+    placeholder="Type English sentences here..."
+    wrap="soft"></textarea>
 
 
 <div id="counter">
 
-Characters: 0 | Lines: 0
+0 characters | 1 line
 
 </div>
 
@@ -306,31 +215,32 @@ Characters: 0 | Lines: 0
 <br>
 
 
-<!-- =================================
-     BUTTONS
-================================= -->
-
-<button
-    id="addBtn"
-    onclick="sendMessage()">
+<button id="addBtn"
+        onclick="sendMessage()">
 
 ADD TEXT
 
 </button>
 
 
-<button
-    id="resetBtn"
-    onclick="resetText()">
+<button id="resetBtn"
+        onclick="resetText()">
 
 RESET
 
 </button>
 
 
-<!-- =================================
-     LOG
-================================= -->
+<div class="help">
+
+Press <b>Enter</b> for a new line.<br>
+
+Press <b>Enter twice</b> to create a blank line.<br>
+
+Press <b>Ctrl + Enter</b> to send.
+
+</div>
+
 
 <div id="log">
 
@@ -345,9 +255,9 @@ Waiting...
 <script>
 
 
-/* =================================
-   MQTT SETTINGS
-================================= */
+// =====================================================
+// MQTT SETTINGS
+// =====================================================
 
 const MQTT_URL =
     "wss://broker.hivemq.com:8884/mqtt";
@@ -361,77 +271,122 @@ const RESET_TOPIC =
     "english/trainer/esp8266_9A7C/reset";
 
 
-/* =================================
-   MQTT CLIENT
-================================= */
+// =====================================================
+// MQTT CLIENT ID
+// =====================================================
 
 const clientID =
-
     "EnglishHTML_" +
-
     Math.random()
-
-        .toString(16)
-
-        .substring(2, 10);
+    .toString(16)
+    .substring(2, 10);
 
 
-const client =
+// =====================================================
+// MQTT CONNECT
+// =====================================================
 
-    mqtt.connect(
+const client = mqtt.connect(
+    MQTT_URL,
+    {
 
-        MQTT_URL,
+        clientId: clientID,
 
-        {
+        clean: true,
 
-            clientId: clientID,
+        connectTimeout: 10000,
 
-            clean: true,
+        reconnectPeriod: 3000
 
-            connectTimeout: 10000,
-
-            reconnectPeriod: 3000
-
-        }
-
-    );
+    }
+);
 
 
-/* =================================
-   ELEMENTS
-================================= */
+// =====================================================
+// HTML ELEMENTS
+// =====================================================
 
 const status =
-
-    document.getElementById(
-        "status"
-    );
+    document.getElementById("status");
 
 
 const log =
-
-    document.getElementById(
-        "log"
-    );
+    document.getElementById("log");
 
 
 const textarea =
-
-    document.getElementById(
-        "message"
-    );
+    document.getElementById("message");
 
 
 const counter =
+    document.getElementById("counter");
 
-    document.getElementById(
-        "counter"
+
+// =====================================================
+// MQTT CONNECTED
+// =====================================================
+
+client.on("connect", function() {
+
+    status.innerHTML =
+        "🟢 MQTT CONNECTED";
+
+    log.textContent =
+        "Connected to MQTT broker.";
+
+    console.log("MQTT CONNECTED");
+
+});
+
+
+// =====================================================
+// MQTT RECONNECT
+// =====================================================
+
+client.on("reconnect", function() {
+
+    status.innerHTML =
+        "🟠 MQTT RECONNECTING...";
+
+});
+
+
+// =====================================================
+// MQTT OFFLINE
+// =====================================================
+
+client.on("offline", function() {
+
+    status.innerHTML =
+        "🔴 MQTT OFFLINE";
+
+});
+
+
+// =====================================================
+// MQTT ERROR
+// =====================================================
+
+client.on("error", function(error) {
+
+    console.log(
+        "MQTT ERROR:",
+        error
     );
 
+    status.innerHTML =
+        "🔴 MQTT ERROR";
 
-/* =================================
-   UPDATE COUNTER
-================================= */
+    log.textContent =
+        "MQTT Error: " +
+        error.message;
+
+});
+
+
+// =====================================================
+// UPDATE CHARACTER / LINE COUNTER
+// =====================================================
 
 function updateCounter() {
 
@@ -439,249 +394,123 @@ function updateCounter() {
         textarea.value;
 
 
-    /*
-       Count REAL lines created
-       by pressing ENTER.
+    const characters =
+        text.length;
 
-       Automatic visual wrapping
-       is NOT counted here.
-    */
 
     const lines =
-        text === ""
-            ? 0
-            : text.split("\n").length;
+        text.split("\n").length;
 
 
     counter.textContent =
-
-        "Characters: " +
-
-        text.length +
-
-        " | Lines: " +
-
-        lines;
+        characters +
+        " characters | " +
+        lines +
+        " lines";
 
 }
 
 
-/* =================================
-   UPDATE COUNTER WHILE TYPING
-================================= */
-
-textarea.addEventListener(
-
-    "input",
-
-    updateCounter
-
-);
-
-
-/* =================================
-   MQTT CONNECT
-================================= */
-
-client.on(
-
-    "connect",
-
-    function() {
-
-
-        status.innerHTML =
-
-            "🟢 MQTT CONNECTED";
-
-
-        log.innerHTML =
-
-            "Connected to MQTT broker.";
-
-
-        console.log(
-
-            "MQTT CONNECTED"
-
-        );
-
-
-    }
-
-);
-
-
-/* =================================
-   MQTT RECONNECT
-================================= */
-
-client.on(
-
-    "reconnect",
-
-    function() {
-
-
-        status.innerHTML =
-
-            "🟠 MQTT RECONNECTING...";
-
-
-    }
-
-);
-
-
-/* =================================
-   MQTT OFFLINE
-================================= */
-
-client.on(
-
-    "offline",
-
-    function() {
-
-
-        status.innerHTML =
-
-            "🔴 MQTT OFFLINE";
-
-
-    }
-
-);
-
-
-/* =================================
-   MQTT ERROR
-================================= */
-
-client.on(
-
-    "error",
-
-    function(error) {
-
-
-        console.log(
-
-            "MQTT ERROR:",
-
-            error
-
-        );
-
-
-        status.innerHTML =
-
-            "🔴 MQTT ERROR";
-
-
-        log.innerHTML =
-
-            "MQTT Error: " +
-
-            error.message;
-
-
-    }
-
-);
-
-
-/* =================================
-   SEND TEXT
-================================= */
+// =====================================================
+// SEND TEXT
+// =====================================================
 
 function sendMessage() {
 
-
     /*
-       DO NOT MODIFY NEWLINES.
+       IMPORTANT:
 
-       Whatever the user typed,
-       including ENTER and blank lines,
-       will be sent exactly as typed.
+       Do NOT use:
+
+       textarea.value.trim()
+
+       because trim() removes
+       whitespace and Enter characters
+       at the beginning/end.
+
+       We keep the original text.
     */
 
     const message =
+        textarea.value;
 
-        textarea.value.trim();
 
-
-    if (message === "") {
-
+    // Check if there is actually text
+    if (message.trim() === "") {
 
         alert(
-
             "Please enter some text."
-
         );
-
 
         return;
 
     }
 
+
+    // Check MQTT connection
 
     if (!client.connected) {
 
-
         alert(
-
             "MQTT is not connected yet."
-
         );
-
 
         return;
 
     }
 
 
+    // Send EXACT textarea content
+
     client.publish(
-
         TEXT_TOPIC,
-
         message
-
     );
 
 
-    log.innerHTML =
+    // Show sent text
 
+    log.textContent =
         "Sent to ESP8266:\n\n" +
-
         message;
 
+
+    // Clear textarea
 
     textarea.value = "";
 
 
-    updateCounter();
+    // Update counter
 
+    updateCounter();
 
 }
 
 
-/* =================================
-   RESET
-================================= */
+// =====================================================
+// RESET
+// =====================================================
 
 function resetText() {
 
-
     if (!client.connected) {
 
-
         alert(
-
             "MQTT is not connected yet."
-
         );
 
+        return;
+
+    }
+
+
+    const confirmReset =
+        confirm(
+            "Are you sure you want to reset all saved text?"
+        );
+
+
+    if (!confirmReset) {
 
         return;
 
@@ -689,67 +518,67 @@ function resetText() {
 
 
     client.publish(
-
         RESET_TOPIC,
-
         "RESET"
-
     );
 
 
-    log.innerHTML =
-
+    log.textContent =
         "RESET sent to ESP8266.";
 
 
 }
 
 
-/* =================================
-   CTRL + ENTER
-================================= */
+// =====================================================
+// TEXTAREA INPUT
+// =====================================================
 
 textarea.addEventListener(
+    "input",
+    function() {
 
-    "keydown",
-
-    function(event) {
-
-
-        /*
-           ENTER alone
-           = normal new line
-
-           CTRL + ENTER
-           = send
-        */
-
-        if (
-
-            event.key === "Enter" &&
-
-            event.ctrlKey
-
-        ) {
-
-
-            event.preventDefault();
-
-
-            sendMessage();
-
-
-        }
-
+        updateCounter();
 
     }
-
 );
 
 
-/* =================================
-   INITIAL COUNTER
-================================= */
+// =====================================================
+// ENTER / CTRL + ENTER
+// =====================================================
+
+textarea.addEventListener(
+    "keydown",
+    function(event) {
+
+        /*
+           Normal Enter:
+
+           Create a real new line.
+
+           We DO NOT preventDefault().
+        */
+
+
+        if (
+            event.key === "Enter" &&
+            event.ctrlKey
+        ) {
+
+            event.preventDefault();
+
+            sendMessage();
+
+        }
+
+    }
+);
+
+
+// =====================================================
+// INITIAL COUNTER
+// =====================================================
 
 updateCounter();
 

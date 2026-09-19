@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 
@@ -40,7 +40,7 @@ body {
 
 .container {
 
-    max-width: 700px;
+    max-width: 500px;
 
     margin: auto;
 
@@ -81,19 +81,25 @@ h1 {
 
 textarea {
 
-    width: 100%;
+    display: block;
 
-    height: 360px;
+    width: 21ch;
+
+    height: 400px;
 
     box-sizing: border-box;
 
-    padding: 12px;
+    margin: 0 auto;
+
+    padding: 10px;
 
     font-family: monospace;
 
     font-size: 18px;
 
     line-height: 1.6;
+
+    letter-spacing: 0;
 
     border-radius: 8px;
 
@@ -107,11 +113,17 @@ textarea {
 
     outline: none;
 
+    overflow-wrap: break-word;
+
+    word-wrap: break-word;
+
+    white-space: pre-wrap;
+
 }
 
 
 /* =================================
-   TEXT AREA FOCUS
+   FOCUS
 ================================= */
 
 textarea:focus {
@@ -122,12 +134,12 @@ textarea:focus {
 
 
 /* =================================
-   CHARACTER GUIDE
+   GUIDE
 ================================= */
 
 .guide {
 
-    margin-top: 8px;
+    margin-top: 10px;
 
     font-size: 14px;
 
@@ -152,7 +164,7 @@ textarea:focus {
 
 
 /* =================================
-   BUTTON
+   BUTTONS
 ================================= */
 
 button {
@@ -226,15 +238,11 @@ button:hover {
 
 @media (max-width: 600px) {
 
-    body {
-
-        padding: 12px;
-
-    }
-
     textarea {
 
-        height: 400px;
+        width: 21ch;
+
+        height: 420px;
 
         font-size: 17px;
 
@@ -269,18 +277,22 @@ English Memory Trainer
 
 <textarea
     id="message"
-    placeholder="Type English here...
-
-Use ENTER to start a new line.
-
-Try to keep each line around
-21 characters for the OLED."
+    wrap="soft"
+    placeholder="Type English here..."
 ></textarea>
 
 
 <div class="guide">
 
-OLED line width: approximately 21 characters
+21 characters per OLED line
+
+<br>
+
+Press ENTER to start a new line.
+
+<br>
+
+Press CTRL + ENTER to send.
 
 </div>
 
@@ -424,18 +436,21 @@ const counter =
 
 function updateCounter() {
 
-
     const text =
-
         textarea.value;
 
 
+    /*
+       Count REAL lines created
+       by pressing ENTER.
+
+       Automatic visual wrapping
+       is NOT counted here.
+    */
+
     const lines =
-
         text === ""
-
             ? 0
-
             : text.split("\n").length;
 
 
@@ -449,12 +464,11 @@ function updateCounter() {
 
         lines;
 
-
 }
 
 
 /* =================================
-   UPDATE WHILE TYPING
+   UPDATE COUNTER WHILE TYPING
 ================================= */
 
 textarea.addEventListener(
@@ -488,7 +502,9 @@ client.on(
 
 
         console.log(
+
             "MQTT CONNECTED"
+
         );
 
 
@@ -582,6 +598,14 @@ client.on(
 
 function sendMessage() {
 
+
+    /*
+       DO NOT MODIFY NEWLINES.
+
+       Whatever the user typed,
+       including ENTER and blank lines,
+       will be sent exactly as typed.
+    */
 
     const message =
 
@@ -683,18 +707,8 @@ function resetText() {
 
 
 /* =================================
-   KEYBOARD
+   CTRL + ENTER
 ================================= */
-
-/*
-
-ENTER
-= New line
-
-CTRL + ENTER
-= Send message
-
-*/
 
 textarea.addEventListener(
 
@@ -702,6 +716,14 @@ textarea.addEventListener(
 
     function(event) {
 
+
+        /*
+           ENTER alone
+           = normal new line
+
+           CTRL + ENTER
+           = send
+        */
 
         if (
 
@@ -739,4 +761,4 @@ updateCounter();
 </body>
 
 </html>
-
+```

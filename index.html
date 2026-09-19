@@ -75,7 +75,7 @@ h1 {
 
 
 /* =================================
-   OLED STYLE TEXT BOX
+   TEXT AREA
 ================================= */
 
 textarea {
@@ -84,7 +84,7 @@ textarea {
 
     width: 21ch;
 
-    height: 360px;
+    height: 400px;
 
     box-sizing: border-box;
 
@@ -114,7 +114,9 @@ textarea {
 
     overflow-wrap: break-word;
 
-    word-break: break-all;
+    word-wrap: break-word;
+
+    white-space: pre-wrap;
 
 }
 
@@ -131,7 +133,7 @@ textarea:focus {
 
 
 /* =================================
-   INFORMATION
+   GUIDE
 ================================= */
 
 .guide {
@@ -161,7 +163,7 @@ textarea:focus {
 
 
 /* =================================
-   BUTTON
+   BUTTONS
 ================================= */
 
 button {
@@ -237,9 +239,11 @@ button:hover {
 
     textarea {
 
-        font-size: 17px;
-
         width: 21ch;
+
+        height: 420px;
+
+        font-size: 17px;
 
     }
 
@@ -267,7 +271,7 @@ English Memory Trainer
 
 
 <!-- =================================
-     21 CHARACTER TEXT BOX
+     SINGLE TEXT BOX
 ================================= -->
 
 <textarea
@@ -279,7 +283,15 @@ English Memory Trainer
 
 <div class="guide">
 
-21 characters per line
+21 characters per OLED line
+
+<br>
+
+Press ENTER to start a new line.
+
+<br>
+
+Press CTRL + ENTER to send.
 
 </div>
 
@@ -418,22 +430,27 @@ const counter =
 
 
 /* =================================
-   COUNTER
+   UPDATE COUNTER
 ================================= */
 
 function updateCounter() {
-
 
     const text =
         textarea.value;
 
 
+    /*
+       Count REAL lines created
+       by pressing ENTER.
+
+       Automatic visual wrapping
+       is NOT counted here.
+    */
+
     const lines =
         text === ""
             ? 0
-            : Math.ceil(
-                text.length / 21
-              );
+            : text.split("\n").length;
 
 
     counter.textContent =
@@ -446,12 +463,11 @@ function updateCounter() {
 
         lines;
 
-
 }
 
 
 /* =================================
-   UPDATE COUNTER
+   UPDATE COUNTER WHILE TYPING
 ================================= */
 
 textarea.addEventListener(
@@ -475,15 +491,19 @@ client.on(
 
 
         status.innerHTML =
+
             "🟢 MQTT CONNECTED";
 
 
         log.innerHTML =
+
             "Connected to MQTT broker.";
 
 
         console.log(
+
             "MQTT CONNECTED"
+
         );
 
 
@@ -504,6 +524,7 @@ client.on(
 
 
         status.innerHTML =
+
             "🟠 MQTT RECONNECTING...";
 
 
@@ -524,6 +545,7 @@ client.on(
 
 
         status.innerHTML =
+
             "🔴 MQTT OFFLINE";
 
 
@@ -544,17 +566,23 @@ client.on(
 
 
         console.log(
+
             "MQTT ERROR:",
+
             error
+
         );
 
 
         status.innerHTML =
+
             "🔴 MQTT ERROR";
 
 
         log.innerHTML =
+
             "MQTT Error: " +
+
             error.message;
 
 
@@ -570,7 +598,16 @@ client.on(
 function sendMessage() {
 
 
+    /*
+       DO NOT MODIFY NEWLINES.
+
+       Whatever the user typed,
+       including ENTER and blank lines,
+       will be sent exactly as typed.
+    */
+
     const message =
+
         textarea.value.trim();
 
 
@@ -578,7 +615,9 @@ function sendMessage() {
 
 
         alert(
+
             "Please enter some text."
+
         );
 
 
@@ -591,7 +630,9 @@ function sendMessage() {
 
 
         alert(
+
             "MQTT is not connected yet."
+
         );
 
 
@@ -636,7 +677,9 @@ function resetText() {
 
 
         alert(
+
             "MQTT is not connected yet."
+
         );
 
 
@@ -664,7 +707,6 @@ function resetText() {
 
 /* =================================
    CTRL + ENTER
-   SEND MESSAGE
 ================================= */
 
 textarea.addEventListener(
@@ -673,6 +715,14 @@ textarea.addEventListener(
 
     function(event) {
 
+
+        /*
+           ENTER alone
+           = normal new line
+
+           CTRL + ENTER
+           = send
+        */
 
         if (
 
@@ -698,7 +748,7 @@ textarea.addEventListener(
 
 
 /* =================================
-   INITIAL
+   INITIAL COUNTER
 ================================= */
 
 updateCounter();
